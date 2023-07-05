@@ -1,0 +1,29 @@
+const defaultTheme = require("tailwindcss/defaultTheme");
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+    content: [
+        "./vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php",
+        "./storage/framework/views/*.php",
+        "./resources/views/**/*.blade.php",
+        "./resources/js/**/*.tsx",
+    ],
+
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ["Lato", ...defaultTheme.fontFamily.sans],
+            },
+        },
+        screens: {
+            xs: "320px",
+            sm: "640px",
+            md: "768px",
+            lg: "960px",
+            xl: "1024px",
+            "2xl": "1280px",
+        },
+    },
+
+    plugins: [require("@tailwindcss/forms")],
+};
