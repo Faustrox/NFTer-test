@@ -18,7 +18,7 @@ const NftCard: React.FC<CardProps> = ({ nft }) => {
         <section className="w-full p-2 border-2 rounded-xl duration-300 hover:border-meta-blue-500">
             <div className="w-full rounded-xl">
                 <img
-                    className="rounded-xl w-full h-auto min-h-[270px]"
+                    className="rounded-xl w-full h-auto max-h-[312px]"
                     src={nft.image_url}
                     alt="NFT"
                 />

@@ -54,12 +54,14 @@ class AuthenticatedSessionController extends Controller
                     $words = explode(" ", $nft['title']);
                     $nftColName = trim($words[0]);
                     $token = trim(str_replace("#", "", strstr($nft['title'], "#")));
+                    $nftMetadata = $nft['metadata'];
+                    $defaultNftImage = 'https://media.istockphoto.com/id/1216251206/vector/no-image-available-icon.jpg?s=612x612&w=0&k=20&c=6C0wzKp_NZgexxoECc8HD4jRpXATfcu__peSYecAwt0=';
                     $nftFiltered = [
                         'token' => $token,
-                        'image_url' => $nft['metadata']['image'],
+                        'image_url' => isset($nftMetadata['image']) && strpos($nftMetadata['image'], 'ipfs') !== 0 ? $nftMetadata['image'] : $defaultNftImage,
                         'collection_name' => $nftColName,
-                        'collection_image' => $nft['metadata']['image'],
-                        'external_url' => @$nft['metadata']['external_url']
+                        'collection_image' => isset($nftMetadata['image']) && strpos($nftMetadata['image'], 'ipfs') !== 0 ? $nftMetadata['image'] : $defaultNftImage,
+                        'external_url' => isset($nftMetadata['external_url']) ? $nftMetadata['external_url'] : '',
                     ];
                     $user->nfts()->create($nftFiltered);
                 }
