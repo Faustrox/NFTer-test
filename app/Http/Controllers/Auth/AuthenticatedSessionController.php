@@ -46,7 +46,6 @@ class AuthenticatedSessionController extends Controller
         if (count($existingNfts) === 0) {
 
             $response = Http::get(env('ALCHEMY_API_URI') . '/' . env('ALCHEMY_API_KEY') . '/getNFTs' . '?owner=' . env('ADDRESS_TO_TEST', $input['address']));
-            dd($response);
 
             $nfts = $response->json()['ownedNfts'];
 
