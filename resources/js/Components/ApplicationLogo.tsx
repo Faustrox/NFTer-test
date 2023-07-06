@@ -1,5 +1,5 @@
 interface Properties {
-    className: string;
+    className?: string;
 }
 
 export default function ApplicationLogo({ className }: Properties): JSX.Element {

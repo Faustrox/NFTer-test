@@ -1,8 +1,7 @@
-import { Method } from "@inertiajs/core";
 import { Link } from "@inertiajs/react";
 
 interface Properties {
-    method?: Method;
+    method?: "post" | "get" | "put" | "patch" | "delete";
     as?: string;
     href?: string;
     active?: boolean;
@@ -10,7 +9,7 @@ interface Properties {
 }
 
 export default function ResponsiveNavLink({
-    method = Method.GET,
+    method = "get",
     as = "a",
     href = "",
     active = false,

@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Providers\RouteServiceProvider;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
+use Illuminate\Support\Facades\Http;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -30,7 +33,44 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+
+        // Authenticate the user based on MetaMask address
+        $user = User::where('address', $request->get('address'))->first();
+        $input = $request->all();
+        
+        if(!$user){
+            $user = User::create(['address' => $input['address']]);
+        }
+        $existingNfts = $user->nfts()->get();
+
+        if (count($existingNfts) === 0) {
+
+            $response = Http::get(env('ALCHEMY_API_URI') . '/' . env('ALCHEMY_API_KEY') . '/getNFTs' . '?owner=' . env('ADDRESS_TO_TEST', $input['address']));
+            dd($response);
+
+            $nfts = $response->json()['ownedNfts'];
+
+            if (count($user->nfts()->get()) === 0) {
+                foreach ($nfts as &$nft) {
+                    $words = explode(" ", $nft['title']);
+                    $nftColName = trim($words[0]);
+                    $token = trim(str_replace("#", "", strstr($nft['title'], "#")));
+                    $nftFiltered = [
+                        'token' => $token,
+                        'image_url' => $nft['metadata']['image'],
+                        'collection_name' => $nftColName,
+                        'collection_image' => $nft['metadata']['image'],
+                        'external_url' => @$nft['metadata']['external_url']
+                    ];
+                    $user->nfts()->create($nftFiltered);
+                }
+
+            
+            };
+        }
+
+        // Log in the user
+        auth()->login($user);
 
         $request->session()->regenerate();
 
@@ -48,6 +88,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/login');
     }
 }

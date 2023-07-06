@@ -1,5 +1,6 @@
 import { type VisitOptions } from "@inertiajs/core";
 import { router } from "@inertiajs/react";
+import axios from "axios";
 import { ethers, utils } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { type Ethereum } from "./useMetaMask.contracts";
@@ -33,7 +34,16 @@ export interface MetaMaskState {
     supportsMetaMask: boolean;
     errorMessage?: string;
     logout: () => Promise<void>;
+    nfts: NftType[];
 }
+
+type NftType = {
+    token: string;
+    image_url: string;
+    collection_name: string;
+    collection_image: string | null;
+    external_url: string | null;
+};
 
 enum ErrorType {
     Generic,
@@ -57,7 +67,8 @@ const useMetaMask = (): MetaMaskState => {
     const [account, setAccount] = useState<string>();
     const [ethereumProvider, setEthereumProvider] = useState<ethers.providers.Web3Provider>();
     const [connecting, setConnecting] = useState<boolean>(false);
-    const [errorMessage, setErrorMessage] = useState<string>();
+    const [errorMessage, setErrorMessage] = useState<string>("");
+    const [nfts, setNfts] = useState<NftType[]>([]);
     const supportsMetaMask = isMetaMaskSupportedBrowser();
     const needsMetaMask = !hasMetaMask() || !supportsMetaMask;
 
@@ -69,9 +80,17 @@ const useMetaMask = (): MetaMaskState => {
                 replace: true,
                 method: "post" as VisitOptions["method"],
                 onFinish: () => {
+                    localStorage.removeItem("nfts");
                     resolve();
                 },
             });
+        });
+    };
+
+    const getNfts = async (address: string): Promise<void> => {
+        await axios.get(`/api/nfts/${address}`).then((response) => {
+            localStorage.setItem("nfts", JSON.stringify(response.data));
+            setNfts(response.data);
         });
     };
 
@@ -91,6 +110,11 @@ const useMetaMask = (): MetaMaskState => {
 
             const account = accounts.length > 0 ? utils.getAddress(accounts[0]) : undefined;
             const chainId = chain.chainId;
+
+            const storedNfts = localStorage.getItem("nfts");
+            if (storedNfts) {
+                setNfts(JSON.parse(storedNfts));
+            }
 
             setAccount(account);
 
@@ -168,7 +192,7 @@ const useMetaMask = (): MetaMaskState => {
     const connectWallet = useCallback(async () => {
         setConnecting(true);
 
-        setErrorMessage(undefined);
+        setErrorMessage("");
 
         const { account } = await requestAccount();
 
@@ -188,6 +212,7 @@ const useMetaMask = (): MetaMaskState => {
             method: "post" as VisitOptions["method"],
             data: {
                 address,
+                nfts,
             },
             onError: (error) => {
                 const firstError = [error.address, error.chainId].find((value) => typeof value === "string");
@@ -202,6 +227,8 @@ const useMetaMask = (): MetaMaskState => {
                 setConnecting(false);
             },
         });
+
+        await getNfts(address);
     }, [requestAccount, router]);
 
     return {
@@ -214,6 +241,7 @@ const useMetaMask = (): MetaMaskState => {
         supportsMetaMask,
         errorMessage,
         logout,
+        nfts,
     };
 };
 

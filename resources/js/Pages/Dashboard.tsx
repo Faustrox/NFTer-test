@@ -1,12 +1,33 @@
+import React, { useState, useEffect } from "react";
 import { Head } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import NFTCard from "@/Components/NftCard";
+import { useMetaMaskContext } from "@/Contexts/MetaMaskContext";
+
+import { ReactComponent as Spinner } from "../../icons/spinner.svg";
+import { ReactComponent as NoNftIcon } from "../../icons/no-nft.svg";
 
 interface Properties {
-    auth: { user: App.Data.UserData };
+    auth: { user: { address: string } };
     errors: any;
 }
 
 export default function Dashboard(properties: Properties): JSX.Element {
+    const [loading, setLoading] = useState(true);
+    const { nfts } = useMetaMaskContext();
+
+    const waitForNfts = () => {
+        if (nfts.length === 0) {
+            setTimeout(() => {
+                setLoading(false);
+            }, 1500);
+        }
+    };
+
+    useEffect(() => {
+        waitForNfts();
+    }, []);
+
     return (
         <AuthenticatedLayout
             auth={properties.auth}
@@ -16,13 +37,30 @@ export default function Dashboard(properties: Properties): JSX.Element {
         >
             <Head title="Dashboard" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">You&apos;re logged in!</div>
+            {nfts.length > 0 ? (
+                <div className="flex justify-center">
+                    <div className="inline-grid 2xl:grid-cols-5 xl:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 xs:grid-cols-1 gap-3 w-[90%] justify-items-center my-12">
+                        {nfts.map((nft, indx) => (
+                            <NFTCard
+                                key={indx}
+                                nft={nft}
+                            />
+                        ))}
                     </div>
                 </div>
-            </div>
+            ) : loading ? (
+                <div className="flex flex-col items-center w-full mt-10">
+                    <Spinner />
+                    Loading
+                </div>
+            ) : (
+                <div className="flex flex-col items-center w-full mt-10">
+                    <NoNftIcon className="h-12 w-12" />
+                    <h2 className="mt-3 font-bold text-[17px] text-meta-black-700">
+                        Unfortunately your wallet does not own any NFTs.
+                    </h2>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

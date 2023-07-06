@@ -10,6 +10,14 @@ class Nft extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'token',
+        'image_url',
+        'collection_name',
+        'collection_image',
+        'external_url'
+    ];
+
     public $timestamps = true;
 
     public function user(): BelongsTo

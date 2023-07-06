@@ -13,15 +13,14 @@ return new class extends Migration
     {
         Schema::create('nfts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
             $table->string('token');
-            $table->string('nft_title');
             $table->string('image_url');
-            $table->string('thumbnail_url');
             $table->string('collection_name');
             $table->string('collection_image')->nullable()->default(null);
             $table->string('external_url')->nullable()->default(null);
             $table->timestamps();
+
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

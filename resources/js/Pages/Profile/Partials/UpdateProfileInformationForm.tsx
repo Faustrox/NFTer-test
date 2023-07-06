@@ -1,5 +1,4 @@
 import { Transition } from "@headlessui/react";
-import { Method } from "@inertiajs/core";
 import { Link, useForm, usePage } from "@inertiajs/react";
 
 import InputError from "@/Components/InputError";
@@ -97,7 +96,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
                             Your email address is unverified.
                             <Link
                                 href={route("verification.send")}
-                                method={Method.POST}
+                                method="post"
                                 as="button"
                                 className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                             >

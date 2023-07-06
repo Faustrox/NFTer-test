@@ -1,5 +1,4 @@
 import { Transition } from "@headlessui/react";
-import { type Method } from "@inertiajs/core";
 import { Link } from "@inertiajs/react";
 import { createContext, Fragment, useContext, useState } from "react";
 
@@ -109,7 +108,7 @@ const Content = ({
 
 interface LinkProperties {
     href?: string;
-    method?: Method;
+    method?: "post" | "get" | "put" | "patch" | "delete";
     as?: string;
     children?: React.ReactNode;
 }
